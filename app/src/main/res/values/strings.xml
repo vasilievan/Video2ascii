@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Video2ascii</string>
+    <string name="app_name" translatable="false">Video2ascii</string>
+    <string name="request_permissions_text">Please, grant the permission.</string>
+    <string name="request_permissions">Request permissions</string>
 </resources>

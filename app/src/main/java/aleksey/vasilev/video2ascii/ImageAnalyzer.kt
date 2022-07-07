@@ -6,6 +6,8 @@ import android.widget.ImageView
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 
+/** Class to analyze image and replace its bitmap of given imageView.
+ * */
 class ImageAnalyzer(private val imageView: ImageView) :
     ImageAnalysis.Analyzer {
     private lateinit var bitmapBuffer: Bitmap
@@ -27,7 +29,10 @@ class ImageAnalyzer(private val imageView: ImageView) :
     private val matrix = Matrix().apply {
         postRotate(90f)
     }
+    private val fontName = "Arial"
 
+    /** Analyze image and replace its bitmap .
+     * */
     @SuppressLint("UnsafeOptInUsageError")
     override fun analyze(image: ImageProxy) {
         if (!::bitmapBuffer.isInitialized) {
@@ -56,11 +61,14 @@ class ImageAnalyzer(private val imageView: ImageView) :
         image.close()
     }
 
+    /** Measure letter sizes and prepare lists, these divide image to byte-groups, for image
+     * modification.
+     * */
     private fun measureLetterSizes() {
         val bounds = Rect()
         paint = Paint()
         paint.apply {
-            typeface = Typeface.create("Arial", Typeface.NORMAL)
+            typeface = Typeface.create(fontName, Typeface.NORMAL)
             textSize = 8f
         }
         asciiSymbols.forEach {
@@ -83,6 +91,8 @@ class ImageAnalyzer(private val imageView: ImageView) :
         canvas = Canvas(letter)
     }
 
+    /** Create samples for ASCII letters to replace byte-groups with them.
+     * */
     private fun createLetterSamples() {
         asciiSymbols.forEach {
             paint.color = Color.WHITE
@@ -105,6 +115,8 @@ class ImageAnalyzer(private val imageView: ImageView) :
         }
     }
 
+    /** Transform bitmap to get ASCII presentation.
+     * */
     private fun transform() {
         widthList.parallelStream().forEach { x ->
             heightList.parallelStream().forEach { y ->
@@ -131,12 +143,16 @@ class ImageAnalyzer(private val imageView: ImageView) :
         imageView.setImageBitmap(bitmap.crop())
     }
 
+    /** Crop image bitmap to fix unmodified corners.
+     * */
     private fun Bitmap.crop(): Bitmap {
         val bitmap = Bitmap.createBitmap(this, 0, 0, widthList.last(), heightList.last())
         this.recycle()
         return bitmap
     }
 
+    /** Find the Quadriple for the given IntArray.
+     * */
     private fun IntArray.countCorners(): Quadruple {
         letter.getPixels(this, 0, maxWidth, 0, 0, maxWidth / 2, maxHeight / 2)
         val nw = this.sum() / this.size

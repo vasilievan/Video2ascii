@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -30,6 +31,17 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.common.util.concurrent.ListenableFuture
 import java.util.concurrent.Executor
+
+/** Video2ascii converter. Presents image as a sequence of same size blocks (one equals to the
+ *  biggest letter in fonts with given parameters). Then a photo is presented in grayscale, 4 areas
+ *  for each block are counted (NW, NE, SW, SE). And due to the density of black pixels comparing to
+ *  default letters (in fact, vectors that present them), next letter is chosen.
+ *
+ *  To change camera view, click on video.
+ *
+ *  @author <a href="mailto:enthusiastic.programmer@yandex.ru">Алексей Васильев</a>
+ *  @version 1.0
+ *  */
 
 class MainActivity : ComponentActivity() {
     private lateinit var analyzer: ImageAnalyzer
@@ -59,6 +71,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** Request permissions if needed.
+     * */
+
     @OptIn(ExperimentalPermissionsApi::class)
     @Composable
     private fun PermissionPreview(cameraPermissionState: PermissionState) {
@@ -67,14 +82,17 @@ class MainActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            val textToShow = "Пожалуйста, предоставьте доступ к камере"
+            val textToShow = stringResource(R.string.request_permissions_text)
             Text(textToShow, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.fillMaxHeight(0.06f))
             Button(onClick = { cameraPermissionState.launchPermissionRequest() }) {
-                Text("Запросить разрешения")
+                Text(stringResource(R.string.request_permissions))
             }
         }
     }
+
+    /** Video preview to show modified video.
+     * */
 
     @SuppressLint("UnsafeOptInUsageError")
     @Composable
@@ -100,6 +118,9 @@ class MainActivity : ComponentActivity() {
             imageView
         })
     }
+
+    /** Listener on cameraProviderFuture to change camera view.
+     * */
 
     private fun addListener(
         cameraProviderFuture: ListenableFuture<ProcessCameraProvider>,
